@@ -1,0 +1,14 @@
+[project]
+name = "minitorch"
+version = "0.1.0"
+description = "A minimal PyTorch-like autograd engine"
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+test = [
+    "torch"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
