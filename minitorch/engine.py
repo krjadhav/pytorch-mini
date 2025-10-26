@@ -1,5 +1,7 @@
+import math
+
 class Tensor:
-    """ Not a tensor yet, working with scalar values for now."""
+    """ Not a tensor yet, working with scalar values for now. Tensors are n-dimensional array of scalars."""
     def __init__(self, data, _children=(), _op=None):
         self.data = data # This can be int or float for now but I think it would be better to use some form of optimized float
         self.grad = 0 # Store the gradient of the tensor, by default we assume changing this variable has no effect on the loss
@@ -150,7 +152,77 @@ class Tensor:
         for v in reversed(topo):
             v._backward()
 
+    def __pow__(self, other):
+        assert isinstance(other, (int, float)), "only supporting int or float for now"
+        out = Tensor(self.data ** other, (self, ), f'^{other}')
+
+        def _backward():
+            # d/dx x^y = y * x^(y-1)
+            self.grad += other * self.data**(other - 1) * out.grad
+        out._backward = _backward
+        return out
+
+    def exp(self):
+        out = Tensor(math.exp(self.data), (self, ), 'exp')
+
+        def _backward():
+            # d/dx e ^ x = e ^ x but we already have e ^ x stored in out.data
+            self.grad += out.data * out.grad
+        out._backward = _backward
+        return out
+
+    def log(self):
+        out = Tensor(math.log(self.data), (self, ), 'log')
+
+        def _backward():
+            # d/dx log(x) = 1/x
+            self.grad += 1 / self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def relu(self):
+        """
+        ReLU(x) = max(0, x) = {
+            x   if x > 0
+            0   if x ≤ 0
+        }
+
+        d/dx ReLU(x) = {
+            1   if x > 0 # since d/dx x = 1
+            0   if x ≤ 0 # since d/dx 0 = 0
+        }
+        """
+        out = Tensor(0 if self.data < 0 else self.data, (self, ), 'ReLU')
+
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+        out._backward = _backward
+        return out
+
+    def __neg__(self):
+        return self * -1
+    
+    def __radd__(self, other):
+        # if a + b fails, then it tries b + a
+        return self + other
+    
+    def __rmul__(self, other):
+        # if a * b fails, then it tries b * a
+        return self * other
+
+    def __sub__(self, other):
+        return self + (-other)
+
+    def __rsub__(self, other):
+        # if a - b fails, then it tries b - a
+        return (-self) + other
+
+    def __truediv__(self, other):
+        return self * (other ** -1)
+    
+    def __rtruediv__(self, other):
+        # if a / b fails, then it tries b / a
+        return (other ** -1) * self
+
     def __repr__(self):
         return f"tensor({self.data:.4f})"
-
-    
