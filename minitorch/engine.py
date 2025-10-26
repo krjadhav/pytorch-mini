@@ -199,6 +199,23 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def tanh(self):
+        """
+        This is also used as a activation function. It is a smooth, non-linear function that maps real-valued numbers to the range (-1, 1).
+        An activation function is a function that is applied to the output of a neuron in a neural network. It is used to introduce non-linearity into the network, which allows it to learn complex patterns in the data.
+        Intuition behind using non-linear functions is that straght lines may not be enough to learn complex patterns in real-world data. By allowing the possibility to have curves, we can learn more complex patterns.
+        See: https://en.wikipedia.org/wiki/Hyperbolic_functions
+        Hyperbolic tangent is defined as:
+        tanh(x) = sinh(x) / cosh(x) = (e^x - e^-x) / (e^x + e^-x) = (e^2x - 1) / (e^2x + 1)
+        """
+        tanh_val = (math.exp(2 * self.data) - 1) / (math.exp(2 * self.data) + 1)
+        out = Tensor(tanh_val, (self, ), 'tanh')
+
+        def _backward():
+            self.grad += (1 - tanh_val**2) * out.grad
+        out._backward = _backward
+        return out
+
     def __neg__(self):
         return self * -1
     
