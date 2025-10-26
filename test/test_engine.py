@@ -3,6 +3,7 @@ import torch
 
 
 def test_basic_add_tensors():
+    print(f"Running test_basic_add_tensors")
     a = Tensor(4)
     b = Tensor(3)
     c = a + b
@@ -12,6 +13,7 @@ def test_basic_add_tensors():
     c_t = a_t + b_t
     
     print(f"c.data: {c.data}, c_t.data: {c_t.data}")
+    check_pass(c.data, c_t.data)
 
 def test_grad_add_tensors():
     print(f"Running test_grad_add_tensors")
@@ -33,6 +35,11 @@ def test_grad_add_tensors():
     print(f"c.grad: {c.grad}, c_t.grad: {c_t.grad}")
     print(f"b.grad: {b.grad}, b_t.grad: {b_t.grad}")
     print(f"a.grad: {a.grad}, a_t.grad: {a_t.grad}")
+
+    check_pass(d.grad, d_t.grad)
+    check_pass(c.grad, c_t.grad)
+    check_pass(b.grad, b_t.grad)
+    check_pass(a.grad, a_t.grad)
 
 def test_grad_mul_tensors():
     print("Running test_grad_mul_tensors")
@@ -58,5 +65,47 @@ def test_grad_mul_tensors():
     print(f"b.grad: {b.grad}, b_t.grad: {b_t.grad}")
     print(f"a.grad: {a.grad}, a_t.grad: {a_t.grad}")
 
+def test_tanh():
+    print("Running test_tanh")
+    a = Tensor(0.4)
+    b = Tensor(0.3)
+    c = Tensor(0.2)
+    d = a + b
+    e = d * c
+    f = e.tanh()
+    f.backward()
+
+    a_t = torch.tensor(0.4, requires_grad=True)
+    b_t = torch.tensor(0.3, requires_grad=True)
+    c_t = torch.tensor(0.2, requires_grad=True)
+    d_t = a_t + b_t
+    d_t.retain_grad() # PyTorch only stores gradients on leaf tensors by default to save memory
+    e_t = d_t * c_t
+    e_t.retain_grad()
+    f_t = e_t.tanh()
+    f_t.retain_grad()
+    f_t.backward()
+
+    print(f"f.grad: {f.grad}, f_t.grad: {f_t.grad}")
+    print(f"e.grad: {e.grad}, e_t.grad: {e_t.grad}")
+    print(f"d.grad: {d.grad}, d_t.grad: {d_t.grad}")
+    print(f"c.grad: {c.grad}, c_t.grad: {c_t.grad}")
+    print(f"b.grad: {b.grad}, b_t.grad: {b_t.grad}")
+    print(f"a.grad: {a.grad}, a_t.grad: {a_t.grad}")
+
+    check_pass(f.grad, f_t.grad)
+    check_pass(e.grad, e_t.grad)
+    check_pass(d.grad, d_t.grad)
+    check_pass(c.grad, c_t.grad)
+    check_pass(b.grad, b_t.grad)
+    check_pass(a.grad, a_t.grad)
+
+def check_pass(tensor_val, torch_val):
+    ok = abs(tensor_val - torch_val.data) < 1e-6
+    print("✅ PASS: " if ok else "❌ FAIL: ", f"Minitorch Value: {tensor_val} vs PyTorch Value: {torch_val.data}")
+
 if __name__ == "__main__":
+    test_basic_add_tensors()
     test_grad_add_tensors()
+    test_grad_mul_tensors()
+    test_tanh()
