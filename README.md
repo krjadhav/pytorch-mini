@@ -1,19 +1,50 @@
 # PyTorch Mini
 
-A work-in-progress minimalist PyTorch library, inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
+A minimalist PyTorch-like autograd engine and neural network library, inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
 
 ## Overview
 
-This project aims to replicate the core concepts of micrograd while building towards a minimalist PyTorch-like library. It implements automatic differentiation (autograd) for scalar values with a simple, educational codebase.
+This project implements automatic differentiation (autograd) for scalar values and provides neural network building blocks. It's designed to be educational, showing how modern deep learning frameworks work under the hood with a simple, well-documented codebase.
+
+**Key Learning Goals:**
+- Understand how automatic differentiation works through computation graphs
+- Learn the mechanics of backpropagation and gradient descent
+- See how neural networks are built from simple components
+- Compare custom implementations with PyTorch to verify correctness
+
+## Quick Start
+
+```python
+from minitorch.engine import Tensor
+from minitorch.nn import MLP
+
+# Basic autograd
+x = Tensor(2.0)
+y = (x ** 2).relu()
+y.backward()
+print(f"dy/dx = {x.grad}")  # 4.0
+
+# Train a neural network
+model = MLP(3, [4, 4, 1])
+# ... (see examples below for full training loop)
+```
 
 ## Features
 
-- **Automatic Differentiation**: Implements backpropagation through a dynamically built computation graph
-- **Mathematical Operations**: Supports addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`), power (`**`) and reverse arithmetic operations (`__radd__`, `__rmul__`, etc.), exponential (`exp`), logarithm (`log`)
-- **Activation Functions**: ReLU and Tanh with automatic differentiation support
-- **Neural Network Components**: Neuron, Layer, and Multi-Layer Perceptron (MLP) classes
-- **Gradient Accumulation**: Handles multiple uses of the same variable in computation graphs
-- **Topological Sorting**: Uses depth-first search for efficient gradient computation
+- **Automatic Differentiation**: Implements backpropagation through a dynamically built computation graph using topological sorting
+- **Mathematical Operations**: 
+  - Arithmetic: `+`, `-`, `*`, `/`, `**` (with reverse operations)
+  - Functions: `exp()`, `log()`
+  - Activations: `relu()`, `tanh()`
+- **Neural Network Components**: 
+  - `Neuron`: Single neuron with learnable weights and bias
+  - `Layer`: Fully-connected layer of neurons
+  - `MLP`: Multi-layer perceptron with configurable architecture
+- **Training Support**: 
+  - Manual gradient descent implementation
+  - Gradient accumulation for reused variables
+  - Zero-gradient functionality
+- **Validation**: Comprehensive tests comparing against PyTorch to ensure correctness
 
 ## Project Structure
 
@@ -32,24 +63,36 @@ pytorch-mini/
 
 ## Current Implementation
 
-### Tensor Class
+### Tensor Class (`engine.py`)
 
-The `Tensor` class (currently working with scalar values) includes:
+The `Tensor` class works with scalar values and includes:
 
-- **Forward pass**: Computes outputs and builds computation graph
-- **Backward pass**: Computes gradients using reverse-mode automatic differentiation via topological sort
-- **Arithmetic Operations**: `+`, `-`, `*`, `/`, `**` with proper gradient functions
-- **Mathematical Functions**: `exp()`, `log()` with automatic differentiation support
-- **Activation Functions**: `relu()`, `tanh()` with automatic differentiation support
-- **Operator Overloading**: Full support for Python operators including reverse operations
+- **Forward pass**: Computes outputs and builds a dynamic computation graph
+- **Backward pass**: Computes gradients using reverse-mode automatic differentiation
+  - Uses topological sorting (DFS) for efficient gradient computation
+  - Supports gradient accumulation for variables used multiple times
+- **Operations**: All operations automatically track gradients
+  - Arithmetic: `+`, `-`, `*`, `/`, `**`
+  - Reverse operations: `__radd__`, `__rsub__`, `__rmul__`, `__rtruediv__`
+  - Math functions: `exp()`, `log()`
+  - Activations: `relu()`, `tanh()`
 
-### Neural Network Components
+### Neural Network Components (`nn.py`)
 
 The `nn.py` module provides building blocks for creating neural networks:
 
-- **Neuron**: Single artificial neuron with learnable weights and bias, applies tanh activation
-- **Layer**: Collection of neurons forming a fully-connected layer
-- **MLP (Multi-Layer Perceptron)**: Stack of layers forming a complete neural network
+- **Neuron**: Single artificial neuron with:
+  - Randomly initialized weights and bias (uniform distribution [-1, 1])
+  - Tanh activation function
+  - `parameters()` method to access learnable parameters
+- **Layer**: Fully-connected layer with:
+  - Configurable number of inputs and outputs
+  - Collection of neurons
+  - Returns single value for 1 output, list for multiple outputs
+- **MLP (Multi-Layer Perceptron)**: Complete neural network with:
+  - Configurable architecture (input size + list of layer sizes)
+  - Sequential layer composition
+  - `parameters()` method to access all learnable parameters
 
 ### Example Usage
 
@@ -93,50 +136,97 @@ print(f"x.grad: {x.grad}")  # Gradient of w with respect to x
 print(f"y.grad: {y.grad}")  # Gradient of w with respect to y
 ```
 
-#### Neural Network Example
+#### Neural Network Training Example
 ```python
 from minitorch.nn import MLP
 
 # Create a 3-layer neural network
 # Input: 3 features, Hidden layers: 4 neurons each, Output: 1 neuron
-mlp = MLP(3, [4, 4, 1])
+model = MLP(3, [4, 4, 1])
 
-# Forward pass
-inputs = [2.0, 3.0, 4.0]
-output = mlp(inputs)
+# Training data
+input_data = [
+    [0.5, 0.5, 0.5],
+    [0.5, 0.5, 1.0],
+    [1.0, 0.5, 0.5],
+    [1.0, 1.0, 1.0],
+]
+desired_targets = [-1.0, 1.0, -1.0, 1.0]
 
-# Backpropagation
-output.backward()
-
-print(f"Output: {output}")
+# Training loop
+lr = 0.01  # learning rate
+for iteration in range(100):
+    # Zero gradients
+    for p in model.parameters():
+        p.grad = 0
+    
+    # Forward pass
+    predictions = [model(x) for x in input_data]
+    
+    # Calculate loss (MSE)
+    loss = sum((pred - target) ** 2 for pred, target in zip(predictions, desired_targets))
+    
+    # Backward pass
+    loss.backward()
+    
+    # Update weights (gradient descent)
+    for p in model.parameters():
+        p.data -= lr * p.grad
+    
+    print(f"Iteration {iteration}: Loss = {loss.data:.6f}")
 ```
 
 ## Testing
 
-Tests compare the custom implementation against PyTorch to verify correctness:
+The project includes comprehensive tests that validate the implementation against PyTorch:
 
+### Engine Tests (`test/test_engine.py`)
+- Basic tensor operations (addition, multiplication)
+- Gradient computation for complex expressions
+- Tanh activation function
+- Gradient accumulation for reused variables
+
+### Neural Network Tests (`test/test_nn.py`)
+- Individual neuron forward pass
+- Layer forward pass
+- MLP forward pass
+- End-to-end training loop with loss visualization
+- Comparison with PyTorch's equivalent implementation
+
+Run tests:
 ```bash
+# Install test dependencies
+pip install torch matplotlib
+
 # Test autograd engine
 python test/test_engine.py
 
-# Test neural network components
+# Test neural network components (includes training visualization)
 python test/test_nn.py
 ```
 
-## Roadmap
+## What's Implemented
 
-- [x] Add more operations (subtraction, division, power, exp, log)
-- [x] Add activation functions (ReLU, Tanh)
-- [x] Implement basic neural network components (Neuron, Layer, MLP)
-- [ ] Add more activation functions (Sigmoid, Softmax)
-- [ ] Implement parameter access and optimization methods
-- [ ] Add loss functions (MSE, Cross-Entropy)
-- [ ] Implement optimizers (SGD, Adam)
-- [ ] Implement true tensor support (multi-dimensional arrays)
-- [ ] Add neural network layers (Linear, Conv2d, etc.)
-- [ ] Implement optimizers (SGD, Adam)
-- [ ] Support for GPU acceleration
-- [ ] Add broadcasting support
+- [x] Scalar autograd engine with reverse-mode differentiation
+- [x] Arithmetic operations: `+`, `-`, `*`, `/`, `**`
+- [x] Math functions: `exp()`, `log()`
+- [x] Activation functions: `relu()`, `tanh()`
+- [x] Neural network components: `Neuron`, `Layer`, `MLP`
+- [x] Parameter access via `.parameters()` method
+- [x] Manual gradient descent training loop
+- [x] Comprehensive tests against PyTorch
+
+## Future Enhancements
+
+- [ ] Additional activation functions (Sigmoid, Softmax, LeakyReLU)
+- [ ] Built-in loss functions (MSE, Cross-Entropy)
+- [ ] Optimizer classes (SGD, Adam, RMSprop)
+- [ ] True tensor support (multi-dimensional arrays)
+- [ ] Broadcasting support
+- [ ] Batch processing
+- [ ] Additional layers (Linear, Conv2d, BatchNorm)
+- [ ] Model serialization (save/load weights)
+- [ ] GPU acceleration support
 
 ## References
 
