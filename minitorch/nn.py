@@ -70,6 +70,9 @@ class MLP:
         mlp = MLP(3, [4, 4, 1])
         mlp(x)
         Here x is the input to the MLP.
+        Let's say the MLP was this: https://share.google/cm87QPLhuy3fOFjZX
+        Then, it starts a sequential transformation pipeline where
+        Raw input (size 3) -> Layer 1 -> tensor list (size 4) -> Layer 2 -> tensor list (size 4) -> Layer 3 (size 1) -> final output (size 1)
         """
         for layer in self.layers:
             x = layer(x)
