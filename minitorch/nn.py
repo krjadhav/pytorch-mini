@@ -22,6 +22,13 @@ class Neuron:
         """
         activation = sum((wi * xi for wi, xi in zip(self.weights, x)), self.bias)
         return activation.tanh() # using tanh for now but this can be changed to any activation function
+
+    def parameters(self):
+        """
+        Returns weights and biases which are the parameters of the neuron
+        Essentially, these are the values that we want to optimize and most care about since input can't be changed.
+        """
+        return self.weights + [self.bias]
     
 class Layer:
     """
@@ -42,6 +49,22 @@ class Layer:
         """
         outs = [n(x) for n in self.neurons]
         return outs if len(outs) > 1 else outs[0] # return the list if it has more than one element else return the first element
+    
+    def parameters(self):
+        """
+        Returns weights and biases of all neurons in the layer
+        
+        params = []
+        for n in self.neurons:
+            params += n.parameters()
+        return params
+
+        Sidenote: params.extend(n.parameters()) is more performant than params += n.parameters() because += creates a new list and extends the old list in place which is more memory intensive.
+        return [p for n in self.neurons for p in n.parameters()] because list comprehensions are more performant than for loops at byte code level.
+
+        """
+        return [p for n in self.neurons for p in n.parameters()]
+
 
 class MLP:
     def __init__(self, num_inputs, num_outputs):
@@ -77,3 +100,9 @@ class MLP:
         for layer in self.layers:
             x = layer(x)
         return x
+    
+    def parameters(self):
+        """
+        Returns weights and biases of all neurons in the MLP
+        """
+        return [p for layer in self.layers for p in layer.parameters()]
