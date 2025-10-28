@@ -1,14 +1,13 @@
 # PyTorch Mini
 
-This is WIP attempt to build a minimalistic Pytorch library for learning purposes inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
+This is WIP attempt to build a minimalistic [PyTorch](https://github.com/pytorch/pytorch) library for learning purposes inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
 
-Currently, it's a tensor class wrapped around scalar and I plan to add support for actual tensors in the future.
+Currently, it's a tensor class wrapped around scalar, and I plan to work towards actual tensor support. More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1).
 
 
 At it's current stage it supports:
 - Scalar operations:
   - Arithmetic: `+`, `-`, `*`, `/`, `**`
-
   - Math functions: `exp()`, `log()`
   - Activations: `relu()`, `tanh()`
 - Autograd Engine:
@@ -99,11 +98,6 @@ for iteration in range(100):
     
     print(f"Iteration {iteration}: Loss = {loss.data:.6f}")
 ```
-
-## References
-
-- [micrograd](https://github.com/karpathy/micrograd) by Andrej Karpathy
-- [PyTorch](https://pytorch.org/) - The full-featured deep learning framework
 
 ## License
 
