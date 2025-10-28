@@ -98,7 +98,3 @@ for iteration in range(100):
     
     print(f"Iteration {iteration}: Loss = {loss.data:.6f}")
 ```
-
-## License
-
-MIT
