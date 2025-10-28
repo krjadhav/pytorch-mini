@@ -48,7 +48,7 @@ c = Tensor(2)
 
 # Build computation graph
 d = a + b  # d = 7
-l = d * c  # e = 14
+l = d * c  # l = 14
 
 # Compute gradients
 l.backward()
