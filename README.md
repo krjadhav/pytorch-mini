@@ -1,47 +1,74 @@
 # PyTorch Mini
 
-This is WIP attempt to build a minimalistic [PyTorch](https://github.com/pytorch/pytorch) library for learning purposes inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
+A minimalistic [PyTorch](https://github.com/pytorch/pytorch)-like library for learning purposes, inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
 
-Currently, it's a tensor class wrapped around scalar, and I plan to work towards actual tensor support. More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1).
+This project implements autograd from scratch with two implementations:
+1. **Scalar-based engine** (`engine.py`) - Educational implementation working with individual scalars
+2. **NumPy-based tensors** (`tensor.py`) - Actual tensor support for n-dimensional arrays
 
+More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1).
 
-At it's current stage it supports:
-- Scalar operations:
-  - Arithmetic: `+`, `-`, `*`, `/`, `**`
-  - Math functions: `exp()`, `log()`
-  - Activations: `relu()`, `tanh()`
-- Autograd Engine:
-  - Forward pass computing outputs and building a dynamic computation graph
-  - Backpropagation computing gradients using reverse-mode automatic differentiation
-- Neural Network API:
-  - `Neuron`: Single neuron with learnable weights and bias
-  - `Layer`: Fully-connected layer of neurons
-  - `MLP`: Multi-layer perceptron with configurable architecture
-  - `parameters()` method to access learnable weights and biases
-- Testing
-  - In `/test` directory, there are tests comparing with PyTorch
+## Features
+
+### Scalar Engine (`minitorch.engine`)
+- **Arithmetic operations**: `+`, `-`, `*`, `/`, `**`
+- **Math functions**: `exp()`, `log()`
+- **Activations**: `relu()`, `tanh()`
+- **Autograd**: Forward pass with dynamic computation graph and reverse-mode automatic differentiation
+
+### Tensor Engine (`minitorch.tensor`)
+- **NumPy-backed tensors**: n-dimensional array support
+- **Operations**: Element-wise `+`, `*`, and `sum()`
+- **Autograd**: Gradient computation for tensor operations
+
+### Neural Network API (`minitorch.nn`)
+- **`Neuron`**: Single neuron with learnable weights and bias
+- **`Layer`**: Fully-connected layer of neurons
+- **`MLP`**: Multi-layer perceptron with configurable architecture
+- **`parameters()`**: Access learnable weights and biases
+
+### Testing
+- Comprehensive tests comparing outputs with PyTorch
+- `test_engine.py`: Tests for scalar-based engine
+- `test_tensor.py`: Tests for NumPy-based tensors
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/krjadhav/pytorch-mini.git
+cd pytorch-mini
+
+# Install dependencies for tensor support
+pip install numpy
+
+# Install test dependencies (optional)
+pip install torch matplotlib
+```
 
 ## Project Structure
 
 ```
 pytorch-mini/
 ├── minitorch/
-│   ├── engine.py          # Core Tensor class with autograd
+│   ├── engine.py          # Scalar-based Tensor with autograd
+│   ├── tensor.py          # NumPy-based Tensor with autograd
 │   └── nn.py              # Neural network components (Neuron, Layer, MLP)
 ├── test/
-│   ├── test_engine.py     # Tests comparing with PyTorch
+│   ├── test_engine.py     # Tests for scalar engine
+│   ├── test_tensor.py     # Tests for NumPy tensors
 │   └── test_nn.py         # Tests for neural network components
 ├── pyproject.toml
 └── README.md
 ```
 
-### Example Usage
+## Example Usage
 
-#### Basic Operations
+### Scalar Operations (engine.py)
 ```python
 from minitorch.engine import Tensor
 
-# Create tensors
+# Create scalar tensors
 a = Tensor(4)
 b = Tensor(3)
 c = Tensor(2)
@@ -58,8 +85,29 @@ print(f"b.grad: {b.grad}")  # 2 (dl/db = c)
 print(f"c.grad: {c.grad}")  # 7 (dl/dc = d)
 ```
 
+### NumPy Tensor Operations (tensor.py)
+```python
+from minitorch.tensor import Tensor
 
-#### Neural Network Training Example
+# Create n-dimensional tensors
+a = Tensor([1, 2, 3])
+b = Tensor([4, 5, 6])
+
+# Element-wise operations
+c = a + b  # [5, 7, 9]
+d = a * b  # [4, 10, 18]
+
+# Compute gradients
+loss = d.sum()  # Sum all elements
+loss.backward()
+
+print(f"a.grad: {a.grad}")  # Gradient with respect to a
+print(f"b.grad: {b.grad}")  # Gradient with respect to b
+```
+
+
+### Neural Network Training Example
+Still need to add tensor implementation
 ```python
 from minitorch.nn import MLP
 
