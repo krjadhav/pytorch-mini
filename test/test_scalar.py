@@ -1,11 +1,11 @@
-from minitorch.engine import Tensor
+from minitorch.scalar import Scalar
 import torch
 
 
 def test_basic_add_tensors():
     print(f"Running test_basic_add_tensors")
-    a = Tensor(4)
-    b = Tensor(3)
+    a = Scalar(4)
+    b = Scalar(3)
     c = a + b
 
     a_t = torch.tensor(4)
@@ -17,8 +17,8 @@ def test_basic_add_tensors():
 
 def test_grad_add_tensors():
     print(f"Running test_grad_add_tensors")
-    a = Tensor(4)
-    b = Tensor(3)
+    a = Scalar(4)
+    b = Scalar(3)
     c = a + b
     d = c + a
     d.backward()
@@ -43,9 +43,9 @@ def test_grad_add_tensors():
 
 def test_grad_mul_tensors():
     print("Running test_grad_mul_tensors")
-    a = Tensor(4)
-    b = Tensor(3)
-    c = Tensor(2)
+    a = Scalar(4)
+    b = Scalar(3)
+    c = Scalar(2)
     d = a + b
     e = d * c
     e.backward()
@@ -67,9 +67,9 @@ def test_grad_mul_tensors():
 
 def test_tanh():
     print("Running test_tanh")
-    a = Tensor(0.4)
-    b = Tensor(0.3)
-    c = Tensor(0.2)
+    a = Scalar(0.4)
+    b = Scalar(0.3)
+    c = Scalar(0.2)
     d = a + b
     e = d * c
     f = e.tanh()

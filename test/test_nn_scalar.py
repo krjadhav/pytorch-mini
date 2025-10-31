@@ -1,4 +1,4 @@
-from minitorch.nn import Neuron, Layer, MLP
+from minitorch.deprecated.nn_scalar import Neuron, Layer, MLP
 import matplotlib.pyplot as plt
 
 
