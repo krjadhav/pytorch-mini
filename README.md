@@ -18,7 +18,15 @@ More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1).
 
 ### Tensor Engine (`minitorch.tensor`)
 - **NumPy-backed tensors**: n-dimensional array support
-- **Operations**: Element-wise `+`, `*`, and `sum()`
+- **Operations**
+  - Binary Operators (takes 2 tensors of the same size and returns a tensor of the same size)
+    - `+`, `-`, `*`, `/`, `**`
+  - Unary Operators (takes a tensor and returns a tensor of the same size)
+    - `exp()`, `log()`, `relu()`, `tanh()`
+  - Reduction Operators (takes a tensor and returns a scalar/ 3d tensor to 2d tensor)
+    - `sum()`
+  - Movement Operators (not implemented yet, but plan to add.)
+    
 - **Autograd**: Gradient computation for tensor operations
 
 ### Neural Network API (`minitorch.nn`)
