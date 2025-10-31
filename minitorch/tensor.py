@@ -4,8 +4,8 @@ import numpy as np
 class Tensor:
     """Tensor is a n-dimensional array of scalars."""
     def __init__(self, data, _children=(), _op=None):
-        self.data = np.array(data) if not isinstance(data, np.ndarray) else data # numpy array
-        self.grad = np.zeros_like(self.data) # numpy array
+        self.data = np.array(data, dtype=np.float32) if not isinstance(data, np.ndarray) else data # numpy array
+        self.grad = np.zeros_like(self.data, dtype=np.float32) # numpy array
         self._backward = lambda: None # Store function to compute the backward pass
         self._prev = set(_children) # Store the previous tensors
         self._op = _op # Store the name of the operation that created this tensor
@@ -136,4 +136,12 @@ class Tensor:
         return y * x**-1
 
     def __repr__(self):
-        return f"Tensor({self.data})"
+        # Format array with PyTorch-like style with trailing zeros
+        if self.data.shape == ():
+            # Scalar
+            data_str = f"{self.data.item():.4f}"
+        else:
+            # Array - format each element with 4 decimals
+            formatted = [f"{x:.4f}" for x in self.data.flatten()]
+            data_str = "[" + ", ".join(formatted) + "]"
+        return f"Tensor({data_str})"    
