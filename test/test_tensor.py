@@ -146,8 +146,8 @@ def test_backward_relu():
     check_pass("b.grad", b.grad, b_t.grad)
     check_pass("a.grad", a.grad, a_t.grad)
 
-def test_log():
-    print("Running test_log")
+def test_backward_log():
+    print("Running test_backward_log")
     a = Tensor([1, 2, 3])
     b = Tensor([4, 5, 6])
     c = Tensor([2, 2, 2])
@@ -187,4 +187,4 @@ if __name__ == "__main__":
     # test_mul_backward()
     # test_tanh()
     # test_backward_relu()
-    # test_log()    
+    test_backward_log()
