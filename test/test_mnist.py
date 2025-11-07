@@ -9,7 +9,7 @@ LR = 0.01
 BATCH_SIZE = 128
 EPOCHS = 10
 
-def pytorch_train(model, train_dataloader, optimizer, epoch, loss_function):
+def pytorch_train(model, train_dataloader, optimizer, epoch, loss_function):    
     model.train()
     epoch_losses = []
     for batch_idx, (data, target) in enumerate(train_dataloader):
@@ -62,6 +62,12 @@ def run_pytorch_training(HIDDEN_LAYERS, LR, BATCH_SIZE, EPOCHS):
     # ========================
     # Define Model
     # ========================
+    # nn.Sequential (https://docs.pytorch.org/docs/stable/generated/torch.nn.Sequential.html)
+    # is a container that let you build nueral networks by stacking layers
+    # in a specific order such that the output of one layer is the input of the next layer
+    # 
+    # A module (https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module)
+    # It's like a layer with many neurons or activation function.
     model = torch.nn.Sequential(
         torch.nn.Linear(784, HIDDEN_LAYERS),
         torch.nn.ReLU(),
@@ -69,10 +75,15 @@ def run_pytorch_training(HIDDEN_LAYERS, LR, BATCH_SIZE, EPOCHS):
     ).to("cpu")
 
     # Set optimizer
+    # Stochastic Gradient Descent (SGD) https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html
     optimizer = torch.optim.SGD(model.parameters(), lr=LR)
 
     # Set loss function
+    # Cross Entropy Loss (https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html)
+    # Cross-entropy loss compares a model’s predictions against the actual class using logarithmic scaling.
+    # It assigns a high penalty for confident and wrong predictions, a moderate penalty for unconfident wrong predictions, and a low penalty for confident and correct predictions.    # 
     loss_function = torch.nn.CrossEntropyLoss(reduction="sum")
+    # loss_function = torch.nn.MultiMarginLoss(reduction="sum") # This gives ~98% accuracy
 
     # ========================
     # Training
