@@ -84,13 +84,15 @@ pip install torch matplotlib
 ```
 pytorch-mini/
 ├── minitorch/
-│   ├── engine.py          # Scalar-based Tensor with autograd
-│   ├── tensor.py          # NumPy-based Tensor with autograd
-│   └── nn.py              # Neural network components (Neuron, Layer, MLP)
+│   ├── scalar.py               # Scalar-based Tensor with autograd
+│   ├── deprecated/nn_scalar.py # Neural network components (Neuron, Layer, MLP)
+│   └── tensor.py               # NumPy-based Tensor with autograd
+│   
 ├── test/
-│   ├── test_engine.py     # Tests for scalar engine
-│   ├── test_tensor.py     # Tests for NumPy tensors
-│   └── test_nn.py         # Tests for neural network components
+│   ├── test_engine.py          # Tests for scalar engine
+│   ├── test_nn.py              # Tests for neural network components
+│   ├── test_tensor.py          # Tests for NumPy tensors
+│   └── test_mnist.py           # Tests for MNIST
 ├── pyproject.toml
 └── README.md
 ```
