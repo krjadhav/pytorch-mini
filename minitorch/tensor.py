@@ -1,4 +1,5 @@
 """Tensor class built on top of numpy arrays"""
+import math
 import numpy as np
 
 class Tensor:
@@ -144,4 +145,35 @@ class Tensor:
             # Array - format each element with 4 decimals
             formatted = [f"{x:.4f}" for x in self.data.flatten()]
             data_str = "[" + ", ".join(formatted) + "]"
-        return f"Tensor({data_str})"    
+        return f"Tensor({data_str})"
+        
+    # Weight Initialization Methods
+    @staticmethod
+    def kaiming_uniform(num_inputs, num_outputs):
+        # num_inputs is fan_in, num_outputs is fan_out. This is the convention used in PyTorch
+        # Check this thread for more details on choices made: https://github.com/pytorch/pytorch/issues/57109
+        # Standard formula:
+        #   gain = sqrt(2 / (1 + a^2)) where `a` is the negative slope of the
+        #        subsequent leaky ReLU (He et al., 2015)
+        #   bound = gain * sqrt(3 / fan_in)
+        #   U(-bound, bound)
+        # Implementation detail:
+        #   PyTorch's kaiming_uniform_ defaults to a = sqrt(5), which makes
+        #   gain = sqrt(1/3) and the bound collapse to 1/sqrt(fan_in).
+        #   We mirror that behaviour so this helper matches nn.Linear's
+        #   initialization convention exactly.
+        gain = math.sqrt(1/3.0)
+        bound = gain * math.sqrt(3.0 / num_inputs)
+        return Tensor(np.random.uniform(-bound, bound, (num_outputs, num_inputs)))
+    
+    @staticmethod
+    # Simple uniform initialization
+    def uniform(num_inputs, num_outputs):
+        bound = 1.0 / math.sqrt(num_inputs)
+        return Tensor(np.random.uniform(-bound, bound, (num_outputs)))
+
+    @staticmethod
+    def normal(num_inputs, num_outputs):
+        return Tensor(np.random.normal(0, 1, (num_outputs, num_inputs)))
+
+        
