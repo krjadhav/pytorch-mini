@@ -31,6 +31,13 @@ Autograd tracks operations performed on tensors and builds a computational graph
 ## Neural Network API
 (WIP) The scalar version is available in [nn_scalar.py](minitorch/deprecated/nn_scalar.py). I'm hoping to implement the `nn` and `nn.optim` modules such as: `nn.Sequential`, `nn.Linear`, `nn.ReLU`, `nn.CrossEntropyLoss` and `nn.SGD` here.
 
+### Initialization
+Unlike micrograd, you can't rely on random initialization to initialize weights. But why randomly initialize weights to begin with? Why not initialize them to 0? Or 1 (or some constant)? It's because all neurons will have identical outputs and the same gradient update so it never learns anything.
+
+The range of initialization is also important. If the range is too small, updates are tiny and training becomes slow ([vanishing gradient](#vanishing-gradient)). If the range is too large, updates are large and doesn't learn anything ([exploding gradient](#exploding-gradient)).
+
+Many researchers have come up with some heuristics by experimentation to initialize weights. The intuition is to depend on the architecture of the network to adjust the range of initialization. The most popular ones are the [Xavier initialization](https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf) and the [He initialization](https://arxiv.org/pdf/1502.01852). I'm going with the **He initialization** for now because it seems to be simple and works well for the ReLU MLP used in the MNIST example.
+
 ## Dataloaders
 (WIP) Dataloaders are used to load data in the models and provide features like shuffling, batch size, etc. I'm hoping to implement the `utils.data.TensorDataset` and `utils.data.DataLoader` modules here.
 
@@ -64,6 +71,12 @@ A directed acyclic graph is a graph with directed edges and no cycles.
 
 ### topological sort
 In a DAG, this is a sorted list of nodes where for every edge u -> v, u comes before v in the ordering.
+
+### vanishing gradient
+Layer updates are so tiny that early layers stop learning.
+
+### exploding gradient
+Layer updates are so large that the model doesn't learn anything.
 
 ## Installation
 
