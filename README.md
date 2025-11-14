@@ -8,7 +8,7 @@ A deep learning library like PyTorch has 4 main components:
 3. Neural Network API
 4. Dataloaders
 
-**Tensors**
+## Tensors
 Tensors are the smallest unit of data structure in the library. I've extended micrograd's scalar engine to a tensor engine using numpy arrays. This can be seen in the [tensor.py](minitorch/tensor.py) file. It essentially encapsulates **data** as well as the **gradient**. For each of these operations, you also need to define the [forward pass](#forward-pass) and [backward pass](#backward-pass).
 
 There are 4 main categories of Tensor operations:
