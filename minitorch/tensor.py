@@ -115,6 +115,32 @@ class Tensor:
 
     # TODO: Add movement operators
 
+    def linear(x, weights, bias):
+        output_data = np.matmul(x.data, weights.data.T) + bias.data
+        out = Tensor(output_data, (x, weights, bias), 'linear')
+
+        def _backward():
+            x.grad += np.matmul(out.grad, weights.data)
+            weights.grad += np.matmul(out.grad.T, x.data)
+            bias.grad += out.grad.sum(axis=0)
+
+        out._backward = _backward
+        return out
+
+    def __matmul__(x, y):
+        data = np.matmul(x.data, y.data)
+        out = Tensor(data, (x, y), '@')
+
+        def _backward():
+            x.grad += np.matmul(out.grad, y.data.T)
+            y.grad += np.matmul(x.data.T, out.grad)
+
+        out._backward = _backward
+        return out
+
+    def __rmatmul__(x, y):
+        return y.__matmul__(x)
+
     def __neg__(x):
         return x * -1
     
@@ -146,7 +172,7 @@ class Tensor:
             formatted = [f"{x:.4f}" for x in self.data.flatten()]
             data_str = "[" + ", ".join(formatted) + "]"
         return f"Tensor({data_str})"
-        
+
     # Weight Initialization Methods
     @staticmethod
     def kaiming_uniform(num_inputs, num_outputs):
@@ -175,5 +201,3 @@ class Tensor:
     @staticmethod
     def normal(num_inputs, num_outputs):
         return Tensor(np.random.normal(0, 1, (num_outputs, num_inputs)))
-
-        
