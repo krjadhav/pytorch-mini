@@ -38,6 +38,9 @@ The range of initialization is also important. If the range is too small, update
 
 Many researchers have come up with some heuristics by experimentation to initialize weights. The intuition is to depend on the architecture of the network to adjust the range of initialization. The most popular ones are the [Xavier initialization](https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf) and the [He initialization](https://arxiv.org/pdf/1502.01852). I'm going with the **He initialization** for now because it seems to be simple and works well for the ReLU MLP used in the MNIST example.
 
+### Layers
+Unlike Pytorch, this doesn't use the `nn.Module` class to define layers. I'm using the `__call__` method to define the [forward pass](#forward-pass).
+
 ## Dataloaders
 (WIP) Dataloaders are used to load data in the models and provide features like shuffling, batch size, etc. I'm hoping to implement the `utils.data.TensorDataset` and `utils.data.DataLoader` modules here.
 
