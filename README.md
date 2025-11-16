@@ -28,6 +28,10 @@ There are 4 main categories of Tensor operations:
 ## Autograd
 Autograd tracks operations performed on tensors and builds a computational graph dynamically to be able to compute [gradients](#gradient). A topological graph is created in the function `Tensor.backward()` and the graph is traversed in reverse order to compute the [gradient](#gradient).
 
+### Optimizers
+There are several optimization techniques that researchers have come up with. SGD is the most basic one and there are others variations like Adam, Adagrad, RMSprop, etc. Broadly, they use different heuristics to adjust [parameters](#parameters)quickly and avoid getting stuck in a poor local minima. I've implemented SGD here but think it would be nice to add some way to auto adjust the learning rate.
+
+
 ## Neural Network API
 (WIP) The scalar version is available in [nn_scalar.py](minitorch/deprecated/nn_scalar.py). I'm hoping to implement the `nn` and `nn.optim` modules such as: `nn.Sequential`, `nn.Linear`, `nn.ReLU`, `nn.CrossEntropyLoss` and `nn.SGD` here.
 
