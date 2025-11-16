@@ -29,8 +29,12 @@ There are 4 main categories of Tensor operations:
 Autograd tracks operations performed on tensors and builds a computational graph dynamically to be able to compute [gradients](#gradient). A topological graph is created in the function `Tensor.backward()` and the graph is traversed in reverse order to compute the [gradient](#gradient).
 
 ### Optimizers
-There are several optimization techniques that researchers have come up with. SGD is the most basic one and there are others variations like Adam, Adagrad, RMSprop, etc. Broadly, they use different heuristics to adjust [parameters](#parameters)quickly and avoid getting stuck in a poor local minima. I've implemented SGD here but think it would be nice to add some way to auto adjust the learning rate.
+There are several optimization techniques that researchers have come up with. [SGD](#sgd) is the most basic one and there are others variations like Adam, Adagrad, RMSprop, etc. Broadly, they use different heuristics to adjust [parameters](#parameters)quickly and avoid getting stuck in a poor local minima. I've implemented a simple [SGD](#sgd) in [minitorch/optim.py](minitorch/optim.py). It would be nice to add some way to auto adjust the learning rate.
 
+
+Similar to optimizers, there are several loss functions. I didn't quite understand the difference between loss, error and accuracy. They seemed like different ways of telling how close the prediction is to the ground truth. The numbers humans use to measure model performance aren’t helpful enough for the model itself. If at every step, the model is still 90% accurate, it’s stuck because it has no way of knowing which direction to adjust [parameters](#parameters). So the feedback it receives needs to be continuous and differentiable that it can be minimized. This can't be done on discrete values like accuracy or error.
+
+I've implemented [Cross Entropy Loss](#cross-entropy-loss) in [minitorch/loss.py](minitorch/loss.py) which compares a model’s predictions against the actual class using logarithmic scaling. It assigns a high penalty for confident and wrong predictions, a moderate penalty for unconfident wrong predictions, and a low penalty for confident and correct predictions.
 
 ## Neural Network API
 (WIP) The scalar version is available in [nn_scalar.py](minitorch/deprecated/nn_scalar.py). I'm hoping to implement the `nn` and `nn.optim` modules such as: `nn.Sequential`, `nn.Linear`, `nn.ReLU`, `nn.CrossEntropyLoss` and `nn.SGD` here.
@@ -52,38 +56,44 @@ Currently, I'm working on getting the NN module, Optimizers and Dataloaders to w
 
 # Jargons
 
-### forward pass
+#### forward pass
 Calculation of the output of a model given the input. This is the normal flow of the model. Eg. f(x)
 
-### loss
+#### loss
 A value that measures the difference between the predicted output and the actual output. It is used to evaluate the performance of the model.
 
-### chain rule
+#### chain rule
 If a loss is 2x increased when model output is changed and the model output is 4x increased when a parameter is changed then loss is influenced 2 x 4 = 8x when a parameter is changed. Mathematically, if l = f(y) and y = g(x) then dl/dx = dl/dy * dy/dx.
 
-### gradient
+#### gradient
 A derivative extended to multi-variable functions is a gradient. A derivative is the slope of a function at a point. Mathematically, derivatives of a y = f(x) is given by dy/dx = lim h->0 (f(x+h) - f(x))/h
 
-### parameters
+#### parameters
 All the weights and biases in a model are called parameters.
 
-### backward pass
+#### backward pass
 Calculation of the [gradient](#gradient) of the [loss](#loss) with respect to the [parameters](#parameters) of the model using the [chain rule](#chain-rule).
 
-### automatic differentiation
+#### automatic differentiation
 For a simple function, we can calculate the [gradient](#gradient) using the [chain rule](#chain-rule). For a more complex function, we can create a computational graph and calculate the [gradient](#gradient) using the [autograd](#autograd) engine.
 
-### DAG
+#### DAG
 A directed acyclic graph is a graph with directed edges and no cycles.
 
-### topological sort
+#### topological sort
 In a DAG, this is a sorted list of nodes where for every edge u -> v, u comes before v in the ordering.
 
-### vanishing gradient
+#### vanishing gradient
 Layer updates are so tiny that early layers stop learning.
 
-### exploding gradient
+#### exploding gradient
 Layer updates are so large that the model doesn't learn anything.
+
+#### SGD
+Stochastic gradient descent. basically ```w -= grad(w)*lr```
+
+#### Cross Entropy Loss
+A type of [loss](#loss) function.
 
 ## Installation
 
