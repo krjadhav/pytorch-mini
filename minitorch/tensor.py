@@ -41,13 +41,23 @@ class Tensor:
         return out
 
     def __mul__(x, y):
-        out = Tensor(x.data * y.data, (x, y), '*')
+        # Support Tensor * Tensor and Tensor * scalar
+        if isinstance(y, Tensor):
+            out = Tensor(x.data * y.data, (x, y), '*')
 
-        def _backward():
-            # d/dx (x * y) = y
-            # d/dy (x * y) = x
-            x.grad += y.data * out.grad
-            y.grad += x.data * out.grad
+            def _backward():
+                # d/dx (x * y) = y
+                # d/dy (x * y) = x
+                x.grad += y.data * out.grad
+                y.grad += x.data * out.grad
+        else:
+            # y is a scalar or numpy array treated as constant (no grad)
+            out = Tensor(x.data * y, (x,), '*')
+
+            def _backward():
+                # d/dx (x * c) = c
+                x.grad += y * out.grad
+
         out._backward = _backward
         return out
 
@@ -56,9 +66,10 @@ class Tensor:
         # Edge cases to deal with type of y. Also accept numpy arrays
         # If y is an int or float then y.data would throw an error
         # If y is a numpy array this should still work I think, but would I need to update y grad?
+        # For now, I'll treat y as a constant and not include it in the computational graph
         y = y.data if isinstance(y, Tensor) else y
         
-        out = Tensor(x.data ** y, (x, y), f'**{y}')
+        out = Tensor(x.data ** y, (x, ), f'**{y}')
 
         def _backward():
             # d/dx x^y = y * x^(y-1)
