@@ -7,6 +7,7 @@ import minitorch
 from minitorch.tensor import Tensor
 from minitorch.nn import Linear, Sequential, ReLU
 from minitorch.optim import SGD
+from minitorch.loss import CrossEntropyLoss
 
 def test_linear_shape():
     # Initialize torch.nn.Linear(784, 128) in pytorch
@@ -167,7 +168,6 @@ def test_sequential_parameters():
     print(f"Total scalar params (by formula): {total_formula_params}")
     print(f"Total scalar params (from tensors): {actual_scalar_params}")
 
-
 def test_sgd_matches_pytorch_step_and_zero_grad():
     torch.manual_seed(0)
     np.random.seed(0)
@@ -257,6 +257,97 @@ def test_sgd_matches_pytorch_step_and_zero_grad():
             print(f"Param {idx} PyTorch data:\n{torch_data}")
             print(f"Param {idx} close: {np.allclose(mini_p.data, torch_data, atol=1e-5, rtol=1e-5)}")
 
+def test_cross_entropy_loss_matches_pytorch():
+    torch.manual_seed(0)
+    np.random.seed(0)
+
+    batch_size = 4
+    num_classes = 10
+
+    logits_np = np.random.randn(batch_size, num_classes).astype(np.float32)
+    targets_np = np.random.randint(0, num_classes, size=(batch_size,), dtype=np.int64)
+
+    mini_logits = Tensor(logits_np)
+    mini_targets = Tensor(targets_np)
+
+    mini_ce = CrossEntropyLoss(reduction="sum")
+    mini_loss = mini_ce(mini_logits, mini_targets)
+
+    torch_logits = torch.tensor(logits_np, dtype=torch.float32)
+    torch_targets = torch.tensor(targets_np, dtype=torch.long)
+
+    torch_ce = torch.nn.CrossEntropyLoss(reduction="sum")
+    torch_loss = torch_ce(torch_logits, torch_targets)
+
+    print("CrossEntropyLoss comparison (reduction='sum'):")
+    print(f"  MiniTorch loss: {mini_loss.data}")
+    print(f"  PyTorch  loss: {torch_loss.item()}")
+
+
+def test_cross_entropy_training_minitorch_vs_pytorch():
+    torch.manual_seed(0)
+    np.random.seed(0)
+
+    in_features = 4
+    hidden_features = 3
+    out_features = 2
+    lr = 0.1
+    batch_size = 2
+    epochs = 3
+
+    x_np = np.random.randn(batch_size, in_features).astype(np.float32)
+    y_np = np.random.randint(0, out_features, size=(batch_size,), dtype=np.int64)
+
+    mini_input = Tensor(x_np)
+    mini_target = Tensor(y_np)
+
+    torch_input = torch.tensor(x_np, dtype=torch.float32)
+    torch_target = torch.tensor(y_np, dtype=torch.long)
+
+    minitorch_model = Sequential(
+        Linear(in_features, hidden_features),
+        ReLU(),
+        Linear(hidden_features, out_features),
+    )
+
+    torch_model = torch.nn.Sequential(
+        torch.nn.Linear(in_features, hidden_features),
+        torch.nn.ReLU(),
+        torch.nn.Linear(hidden_features, out_features),
+    )
+
+    # Sync initial parameters so models start identically
+    with torch.no_grad():
+        torch_model[0].weight.copy_(torch.tensor(minitorch_model[0].weights.data, dtype=torch.float32))
+        torch_model[0].bias.copy_(torch.tensor(minitorch_model[0].bias.data, dtype=torch.float32))
+        torch_model[2].weight.copy_(torch.tensor(minitorch_model[2].weights.data, dtype=torch.float32))
+        torch_model[2].bias.copy_(torch.tensor(minitorch_model[2].bias.data, dtype=torch.float32))
+
+    mini_params = minitorch_model.parameters()
+    mini_optim = SGD(mini_params, lr=lr)
+    torch_optim = torch.optim.SGD(torch_model.parameters(), lr=lr)
+
+    mini_ce = CrossEntropyLoss(reduction="sum")
+    torch_ce = torch.nn.CrossEntropyLoss(reduction="sum")
+
+    for epoch in range(epochs):
+        mini_optim.zero_grad()
+        torch_optim.zero_grad()
+
+        mini_logits = minitorch_model(mini_input)
+        mini_loss = mini_ce(mini_logits, mini_target)
+
+        torch_logits = torch_model(torch_input)
+        torch_loss = torch_ce(torch_logits, torch_target)
+
+        print(f"Epoch {epoch} | MiniTorch loss: {mini_loss.data} vs PyTorch loss: {torch_loss.item()}")
+
+        mini_loss.backward()
+        torch_loss.backward()
+
+        mini_optim.step()
+        torch_optim.step()
+
 
 if __name__ == "__main__":
     # test_kaiming_uniform_bounds()
@@ -264,4 +355,6 @@ if __name__ == "__main__":
     # test_sequential_composition()
     # test_linear_relu_small()
     # test_sequential_parameters()
-    test_sgd_matches_pytorch_step_and_zero_grad()
+    # test_sgd_matches_pytorch_step_and_zero_grad()
+    # test_cross_entropy_loss_matches_pytorch()
+    test_cross_entropy_training_minitorch_vs_pytorch()
