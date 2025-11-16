@@ -28,16 +28,16 @@ There are 4 main categories of Tensor operations:
 ## Autograd
 Autograd tracks operations performed on tensors and builds a computational graph dynamically to be able to compute [gradients](#gradient). A topological graph is created in the function `Tensor.backward()` and the graph is traversed in reverse order to compute the [gradient](#gradient).
 
-### Optimizers
-There are several optimization techniques that researchers have come up with. [SGD](#sgd) is the most basic one and there are others variations like Adam, Adagrad, RMSprop, etc. Broadly, they use different heuristics to adjust [parameters](#parameters)quickly and avoid getting stuck in a poor local minima. I've implemented a simple [SGD](#sgd) in [minitorch/optim.py](minitorch/optim.py). It would be nice to add some way to auto adjust the learning rate.
+**Optimizers**
+There are several optimization techniques that researchers have come up with. [SGD](#sgd) is the most basic one and there are others variations like Adam, Adagrad, RMSprop, etc. Broadly, they use different heuristics to adjust [parameters](#parameters) quickly and avoid getting stuck in a poor local minima. I've implemented a simple [SGD](#sgd) in [minitorch/optim.py](minitorch/optim.py). It would be nice to add some way to auto adjust the learning rate.
 
-
+**Loss Functions**
 Similar to optimizers, there are several loss functions. I didn't quite understand the difference between loss, error and accuracy. They seemed like different ways of telling how close the prediction is to the ground truth. The numbers humans use to measure model performance aren’t helpful enough for the model itself. If at every step, the model is still 90% accurate, it’s stuck because it has no way of knowing which direction to adjust [parameters](#parameters). So the feedback it receives needs to be continuous and differentiable that it can be minimized. This can't be done on discrete values like accuracy or error.
 
 I've implemented [Cross Entropy Loss](#cross-entropy-loss) in [minitorch/loss.py](minitorch/loss.py) which compares a model’s predictions against the actual class using logarithmic scaling. It assigns a high penalty for confident and wrong predictions, a moderate penalty for unconfident wrong predictions, and a low penalty for confident and correct predictions.
 
 ## Neural Network API
-(WIP) The scalar version is available in [nn_scalar.py](minitorch/deprecated/nn_scalar.py). I'm hoping to implement the `nn` and `nn.optim` modules such as: `nn.Sequential`, `nn.Linear`, `nn.ReLU`, `nn.CrossEntropyLoss` and `nn.SGD` here.
+A tensor-based neural network API in [nn.py](minitorch/nn.py) that mirrors a tiny subset of `torch.nn`, and the scalar version is still available in [nn_scalar.py](minitorch/deprecated/nn_scalar.py). Currently, it implements [Linear](#linear), and the [Sequential](#sequential) container. I don't quite like the `nn.ReLU()` syntax and feel it's an unnecessary boilerplate so I plan to remove this.
 
 ### Initialization
 Unlike micrograd, you can't rely on random initialization to initialize weights. But why randomly initialize weights to begin with? Why not initialize them to 0? Or 1 (or some constant)? It's because all neurons will have identical outputs and the same gradient update so it never learns anything.
