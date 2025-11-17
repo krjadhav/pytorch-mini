@@ -50,9 +50,11 @@ Many researchers have come up with some heuristics by experimentation to initial
 Unlike Pytorch, this doesn't use the `nn.Module` class to define layers. I'm using the `__call__` method to define the [forward pass](#forward-pass).
 
 ## Dataloaders
-(WIP) Dataloaders are used to load data in the models and provide features like shuffling, batch size, etc. I'm hoping to implement the `utils.data.TensorDataset` and `utils.data.DataLoader` modules here.
+Dataloaders are used to feed data into the model. In most cases, you need to feed data in [batches](#batch) where the it's shuffled each [epoch](#epoch). When testing the MNIST model on Pytorch, batch size does seem to impact the accuracy of the model but I'm not sure what the optimal batch size is but from experience, 128 seems to be a good starting point.
 
-Currently, I'm working on getting the NN module, Optimizers and Dataloaders to work so that I can get a MNIST training example working in [test_mnist.py](test/test_mnist.py). Later, I plan to get it to work with convolutions and also go deeper into low level optimizations.
+I've implemented a very simple data loader in [dataloaders.py](minitorch/dataloaders.py) that shuffles the data and feeds it in batches. I'm not using the `TensorDataset` because it seems to create tuples under the hood and figured I'd just combine this with the `DataLoader` class. It shuffles data using numpy's random shuffle and Python's generator to `yield` (compute and return shuffled pairs of (data, labels) one at a time using index-based slicing).
+
+Currently, my goal is to get a MNIST training example working in [test_mnist.py](test/test_mnist.py). Later, I plan to get it to work with convolutions and also go deeper into low level optimizations.
 
 # Jargons
 
@@ -94,6 +96,12 @@ Stochastic gradient descent. basically ```w -= grad(w)*lr```
 
 #### Cross Entropy Loss
 A type of [loss](#loss) function.
+
+#### batch
+chunks of data
+
+#### epoch
+Iteration of the training loop
 
 ## Installation
 
