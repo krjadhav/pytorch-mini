@@ -18,7 +18,6 @@ EPOCHS = 10
 
 def pytorch_train(model, train_dataloader, optimizer, epoch, loss_function):    
     model.train()
-    epoch_losses = []
     for batch_idx, (data, target) in enumerate(train_dataloader):
         data, target = data.to("cpu"), target.to("cpu")
         optimizer.zero_grad()
@@ -26,18 +25,15 @@ def pytorch_train(model, train_dataloader, optimizer, epoch, loss_function):
         loss = loss_function(output, target)
         loss.backward()
         optimizer.step()
-        epoch_losses.append(loss.item())
         # print(f"Train Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item():.4f}")
 
 def minitorch_train(model, train_dataloader, optimizer, epoch, loss_function):
-    epoch_losses = []
     for batch_idx, (data, target) in enumerate(train_dataloader):
         optimizer.zero_grad()
         output = model(data)
         loss = loss_function(output, target)
         loss.backward()
         optimizer.step()
-        epoch_losses.append(loss.item())
         # print(f"Train Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item():.4f}")
 
 def pytorch_test(model, test_dataloader, loss_function):
