@@ -113,7 +113,7 @@ class Tensor:
         out._backward = _backward
         return out
 
-    def flatten(self, start_dim=0):
+    def flatten(x, start_dim=0):
         """
         This function takes multiple dimenssions and merges them into one
         arr = np.ones((5, 2, 2))
@@ -129,16 +129,29 @@ class Tensor:
         # TODO: Deal with edge cases
         # For now, assuming this wont get wild inputs
         end_dim = -1 # TODO: add this to param later
-        new_shape = self.data.shape[:start_dim] + (end_dim, )
-        return Tensor(self.data.reshape(new_shape))
+        new_shape = x.data.shape[:start_dim] + (end_dim, )
+        return Tensor(x.data.reshape(new_shape))
 
     # Reduction Operators
-    def sum(self):
-        out = Tensor(np.sum(self.data), (self, ), 'sum')
+    def sum(x):
+        out = Tensor(np.sum(x.data), (x, ), 'sum')
 
         def _backward():
             # d/dx sum(x) = 1
-            self.grad += out.grad
+            x.grad += out.grad
+        out._backward = _backward
+
+        return out
+
+    def argmax(x, dim, keepdim=True):
+        # returns the index (or indices) of the maximum value within an array,
+        # dim is the axis along which to search for max value (0 for rows, 1 for columns)
+        # keepdim is whether to keep the dimensions of the input array
+        out = Tensor(np.argmax(x.data, axis=dim, keepdims=keepdim), (x, ), 'argmax')
+
+        def _backward():
+            # d/dx argmax(x) = 1
+            x.grad += out.grad
         out._backward = _backward
 
         return out
