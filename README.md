@@ -1,4 +1,6 @@
+
 # Pytorch-Mini
+[![GitHub](https://img.shields.io/badge/GitHub-krjadhav-blue)](https://github.com/krjadhav/pytorch-mini) [![PyPI](https://img.shields.io/pypi/v/pytorch-mini)](https://pypi.org/project/pytorch-mini/)
 
 This is an attempt to create a minimalist deep learning library from scratch to demystify how [PyTorch](https://github.com/pytorch/pytorch) works internally. Inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd), I started with a scalar engine and then extended it to a tensor engine (More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1)).
 
