@@ -1,5 +1,6 @@
 import torch
 from minitorch.tensor import Tensor
+from mnist_util import load_mnist_data
 
 def test_basic_add_tensors():
     print(f"Running test_basic_add_tensors")
@@ -181,10 +182,25 @@ def test_backward_log():
     check_pass("a.grad", a.grad, a_t.grad)
 
 
+def test_flatten_mnist_x_train():
+    print("Running test_flatten_mnist_x_train")
+    X_train, Y_train, X_test, Y_test = load_mnist_data()
+    mt_tensor = Tensor(X_train/255)
+    mt_flat = mt_tensor.flatten(start_dim=1)
+    pt_tensor = torch.tensor(X_train/255, dtype=torch.float32)
+    pt_flat = pt_tensor.flatten(start_dim=1)
+    print(f"After flatten: {mt_flat.data.shape} | pt_flat.shape: {pt_flat.shape}")
+    mt_array = mt_flat.data
+    if mt_array.shape == pt_flat.shape and torch.allclose(torch.tensor(mt_array, dtype=torch.float32), pt_flat, atol=1e-6):
+        print(f"flatten(X_train) values ✅ PASS | shape: {mt_array.shape}")
+    else:
+        print("flatten(X_train) values ❌ FAIL")
+
 if __name__ == "__main__":
     # test_basic_add_tensors()
     # test_basic_mul_tensors()
     # test_mul_backward()
     # test_tanh()
     # test_backward_relu()
-    test_backward_log()
+    # test_backward_log()
+    test_flatten_mnist_x_train()
