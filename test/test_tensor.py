@@ -195,6 +195,19 @@ def test_flatten_mnist_x_train():
         print(f"flatten(X_train) values ✅ PASS | shape: {mt_array.shape}")
     else:
         print("flatten(X_train) values ❌ FAIL")
+        
+def test_argmax():
+    print("Running test_argmax")
+    data = [[0.1, 0.9, 0.0],
+            [0.31, 0.22, 0.47],
+            [0.3, 0.3, 0.4]]
+    mt_tensor = Tensor(data)
+    mt_argmax = mt_tensor.argmax(dim=1, keepdim=True)
+
+    pt_tensor = torch.tensor(data, dtype=torch.float32)
+    pt_argmax = torch.argmax(pt_tensor, dim=1, keepdim=True)
+ 
+    print(f"argmax minitorch: {mt_argmax} | pytorch: {pt_argmax}")
 
 if __name__ == "__main__":
     # test_basic_add_tensors()
@@ -203,4 +216,5 @@ if __name__ == "__main__":
     # test_tanh()
     # test_backward_relu()
     # test_backward_log()
-    test_flatten_mnist_x_train()
+    # test_flatten_mnist_x_train()
+    test_argmax()
