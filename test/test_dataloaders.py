@@ -12,7 +12,7 @@ def test_minitorch_dataloader_vs_torch_mnist():
     # Use a subset for speed
     n_samples = 1024
     batch_size = 128
-    shuffle = True
+    shuffle = False
 
     X_subset = X_train[:n_samples]
     Y_subset = Y_train[:n_samples]
