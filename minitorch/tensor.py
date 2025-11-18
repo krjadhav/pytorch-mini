@@ -113,6 +113,25 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def flatten(self, start_dim=0):
+        """
+        This function takes multiple dimenssions and merges them into one
+        arr = np.ones((5, 2, 2))
+                       dim0 dim1 dim2
+                       ↑    ↑    ↑
+                 index 0    1    2
+        (dim 0): 5 major groups, (dim 1): 2 subgroups, (dim 3): 2 subgroups
+        - flatten(arr, start_dim=1) would result in (5, 4) ie it keep dim0 and merge dim1 and dim2
+        - flatten(arr, start_dim=0) would result in (20) ie it merge all dimensions
+        .shape[:start_dim] keeps the grouping levels from 0 but not including the start_dim
+        - In numpy -1 figues out the dimensions automatically so (end_dim, ) merges the remaining dimensions
+        """
+        # TODO: Deal with edge cases
+        # For now, assuming this wont get wild inputs
+        end_dim = -1 # TODO: add this to param later
+        new_shape = self.data.shape[:start_dim] + (end_dim, )
+        return Tensor(self.data.reshape(new_shape))
+
     # Reduction Operators
     def sum(self):
         out = Tensor(np.sum(self.data), (self, ), 'sum')
