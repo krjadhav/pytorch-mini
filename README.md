@@ -124,6 +124,9 @@ pytorch-mini/
 ├── minitorch/
 │   ├── nn.py                   # Neural network APIs (eg. Linear, ReLU, CrossEntropyLoss)
 │   ├── tensor.py               # NumPy-based Tensor with autograd
+│   ├── dataloaders.py          # DataLoader for MNIST
+│   ├── loss.py                 # Loss functions (eg. CrossEntropyLoss)
+│   ├── optimizer.py            # Optimizers (eg. SGD)
 │   └── deprecated/             # Micrograd implementation
 │       ├── nn_scalar.py        # Neural network APIs (Neuron, Layer, MLP)
 │       └── scalar.py           # Scalar with autograd
@@ -133,8 +136,8 @@ pytorch-mini/
 │   ├── test_tensor.py          # Tests for NumPy tensors
 │   └── test_mnist.py           # Tests for MNIST
 │   └── deprecated/             # Micrograd Tests
-│       └── test_engine.py      # Tests for scalar engine 
-|
+│       └── test_engine.py      # Tests for scalar engine
+│       └── test_nn_scalar.py   # Tests for scalar neural network APIs
 ├── pyproject.toml
 └── README.md
 ```
