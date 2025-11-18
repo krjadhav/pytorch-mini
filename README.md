@@ -1,6 +1,21 @@
 # Pytorch-Mini
 
-This is an attempt to create a minimalist deep learning library from scratch to demystify how [PyTorch](https://github.com/pytorch/pytorch) works internally. Inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd), I started with a scalar engine and then extended it to a tensor engine (More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1)). My goal is to write most of the code without relying on external libraries and abstractions. So far it's been a rewarding learning experience and I'm heading into PyTorch codebase's rabbit hole. Along the way, I've also come across several jargons that I've found helpful to understand [jargons](#jargons). Oh well, I guess I'm in for a long journey :) 
+This is an attempt to create a minimalist deep learning library from scratch to demystify how [PyTorch](https://github.com/pytorch/pytorch) works internally. Inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd), I started with a scalar engine and then extended it to a tensor engine (More on [roadmap](https://github.com/users/krjadhav/projects/3/views/1)).
+
+This library supports a full MNIST training example on CPU. I ran it against PyTorch on a similar architecture and it seems to perform equivalently and slightly outperorms PyTorch on accuracy and time taken.
+
+```
+========================================================================
+                         MNIST Training Summary                         
+========================================================================
+Framework     Final Acc (%)     Final Loss   Total Time (s)
+------------------------------------------------------------------------
+PyTorch               96.04         0.1419             4.81
+Minitorch             96.41         0.1319             4.42
+========================================================================
+```
+
+My goal is to write most of the code without relying on external libraries and abstractions. So far it's been a rewarding learning experience and I'm heading into PyTorch codebase's rabbit hole. Along the way, I've also come across several jargons that I've found helpful to understand [jargons](#jargons). It's also been very helpful to debug issues by comparing outputs to Pytorch so I've done so in the [test/](test). Oh well, I guess I'm in for a long journey :)
 
 A deep learning library like PyTorch has 4 main components:
 1. Tensors
@@ -22,7 +37,7 @@ There are 4 main categories of Tensor operations:
     These operations are especially helpful when calculating gradients. Otherwise you run into the error `RuntimeError: grad can be implicitly created only for scalar outputs`
 4. Movement Operations (not implemented yet, but plan to add.)
     I'm yet to go through the codebase to understand how to implement this but they essentially transform tensor data without needing to copy the data.
-    - Eg. `reshape()`, `to()`, `cpu()`, `cuda()`
+    - Eg. `reshape()`, `to()`, `cpu()`, `cuda()` 
 
 
 ## Autograd
@@ -39,6 +54,8 @@ I've implemented [Cross Entropy Loss](#cross-entropy-loss) in [minitorch/loss.py
 ## Neural Network API
 A tensor-based neural network API in [nn.py](minitorch/nn.py) that mirrors a tiny subset of `torch.nn`, and the scalar version is still available in [nn_scalar.py](minitorch/deprecated/nn_scalar.py). Currently, it implements [Linear](#linear), and the [Sequential](#sequential) container. I don't quite like the `nn.ReLU()` syntax and feel it's an unnecessary boilerplate so I plan to remove this.
 
+
+
 ### Initialization
 Unlike micrograd, you can't rely on random initialization to initialize weights. But why randomly initialize weights to begin with? Why not initialize them to 0? Or 1 (or some constant)? It's because all neurons will have identical outputs and the same gradient update so it never learns anything.
 
@@ -52,9 +69,7 @@ Unlike Pytorch, this doesn't use the `nn.Module` class to define layers. I'm usi
 ## Dataloaders
 Dataloaders are used to feed data into the model. In most cases, you need to feed data in [batches](#batch) where the it's shuffled each [epoch](#epoch). When testing the MNIST model on Pytorch, batch size does seem to impact the accuracy of the model but I'm not sure what the optimal batch size is but from experience, 128 seems to be a good starting point.
 
-I've implemented a very simple data loader in [dataloaders.py](minitorch/dataloaders.py) that shuffles the data and feeds it in batches. I'm not using the `TensorDataset` because it seems to create tuples under the hood and figured I'd just combine this with the `DataLoader` class. It shuffles data using numpy's random shuffle and Python's generator to `yield` (compute and return shuffled pairs of (data, labels) one at a time using index-based slicing).
-
-Currently, my goal is to get a MNIST training example working in [test_mnist.py](test/test_mnist.py). Later, I plan to get it to work with convolutions and also go deeper into low level optimizations.
+I've implemented a very simple data loader in [dataloaders.py](minitorch/dataloaders.py) that shuffles the data and feeds it in batches. I'm not using the `TensorDataset` because it seems to create tuples under the hood and figured I'd just combine this with the `DataLoader` class. It shuffles data using numpy's random shuffle and Python's generator to `yield` (compute and return shuffled pairs of (data, labels) one at a time using index-based slicing). I ran into a couple of `TypeErrors` here because I forgot to add `__len__`, `__getitem__` and `item()` methods to the `Tensor` class.
 
 # Jargons
 
@@ -109,8 +124,6 @@ Iteration of the training loop
 # Clone the repository
 git clone https://github.com/krjadhav/pytorch-mini.git
 cd pytorch-mini
-
-# Install dependencies for tensor support
 pip install numpy
 
 # Install test dependencies (optional)
@@ -127,6 +140,7 @@ pytorch-mini/
 │   ├── dataloaders.py          # DataLoader for MNIST
 │   ├── loss.py                 # Loss functions (eg. CrossEntropyLoss)
 │   ├── optimizer.py            # Optimizers (eg. SGD)
+│   ├── datasets.py             # utils to download and use external datasets like MNIST
 │   └── deprecated/             # Micrograd implementation
 │       ├── nn_scalar.py        # Neural network APIs (Neuron, Layer, MLP)
 │       └── scalar.py           # Scalar with autograd
@@ -142,22 +156,61 @@ pytorch-mini/
 └── README.md
 ```
 
-## Example Tensor Operations
+## Example
+See [examples/mnist.py](examples/mnist.py)
 ```python
+import minitorch
 from minitorch.tensor import Tensor
+from minitorch.dataloaders import DataLoader
 
-# Create n-dimensional tensors
-a = Tensor([1, 2, 3])
-b = Tensor([4, 5, 6])
+def train(model, train_dataloader, optimizer, epoch, loss_function):
+    for batch_idx, (data, target) in enumerate(train_dataloader):
+        optimizer.zero_grad()
+        output = model(data)
+        loss = loss_function(output, target)
+        loss.backward()
+        optimizer.step()
 
-# Element-wise operations
-c = a + b  # [5, 7, 9]
-d = a * b  # [4, 10, 18]
+def test(model, test_dataloader, loss_function):
+    test_loss, correct, total = 0.0, 0, 0
+    for data, target in test_dataloader:
+        output = model(data)
+        test_loss += loss_function(output, target).item()
+        pred = output.argmax(dim=1, keepdim=True)
+        correct += pred.eq(target.view_as(pred)).sum().item()        
+        total += len(target)
+    
+    print(f"Average loss: {test_loss/total:.4f}, Accuracy: {100.0 * correct/total:.2f}%")
 
-# Compute gradients
-loss = d.sum()  # Sum all elements
-loss.backward()
+if __name__ == "__main__":
+    # Load data
+    X_train, Y_train, X_test, Y_test = minitorch.datasets.mnist()
+    
+    # create tensors
+    x_train = Tensor(X_train/255).flatten(start_dim=1)
+    y_train = Tensor(Y_train)
+    x_test = Tensor(X_test/255).flatten(start_dim=1)
+    y_test = Tensor(Y_test)
+    
+    # prepare dataloaders
+    train_dataloader = DataLoader(x_train, y_train, batch_size=128, shuffle=True)
+    test_dataloader = DataLoader(x_test, y_test, batch_size=128, shuffle=False)
 
-print(f"a.grad: {a.grad}")  # Gradient with respect to a
-print(f"b.grad: {b.grad}")  # Gradient with respect to b
+    # define model
+    model = minitorch.nn.Sequential(
+        minitorch.nn.Linear(784, 128),
+        minitorch.nn.ReLU(),
+        minitorch.nn.Linear(128, 64),
+    )
+
+    # define optimizer
+    optimizer = minitorch.optim.SGD(model.parameters(), lr=0.01)
+
+    # define loss function
+    loss_function = minitorch.loss.CrossEntropyLoss(reduction="sum")
+    
+    # train
+    for epoch in range(1, 11):
+        train(model, train_dataloader, optimizer, epoch, loss_function)
+        test(model, test_dataloader, loss_function)
 ```
