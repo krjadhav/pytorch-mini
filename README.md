@@ -16,7 +16,7 @@ There are 4 main categories of Tensor operations:
     - Eg. `+`, `-`, `*`, `/`, `**`
     Unlike scalars, tensors are N-dimensional arrays which introduces edge cases in the implementation. For eg. when adding two tensors of different shapes, we need to broadcast the smaller tensor to match the shape of the larger tensor. For now, numpy's broadcasting feature is used. Also I've learned that it helps to explicilty initialize precisions to avoid errors like `numpy._core._exceptions._UFuncOutputCastingError: Cannot cast ufunc 'add' output from dtype('float64') to dtype('int64') with casting rule 'same_kind'`
 2. **Unary Operations** (takes a tensor and returns a tensor of the same size)
-    - Eg. `exp()`, `log()`, `relu()`, `tanh()`
+    - Eg. `exp()`, `log()`, `relu()`, `tanh()`, `flatten()`
 3. **Reduction Operations** (takes a tensor and returns a scalar/ 3d tensor to 2d tensor)
     - Eg. `sum()`
     These operations are especially helpful when calculating gradients. Otherwise you run into the error `RuntimeError: grad can be implicitly created only for scalar outputs`
