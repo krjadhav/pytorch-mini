@@ -156,6 +156,17 @@ class Tensor:
 
         return out
 
+    def eq(x, y):
+        # Elementwise equality for accuracy; no gradient tracking
+        y_data = y.data if isinstance(y, Tensor) else y
+        out_data = (x.data == y_data).astype(np.float32)
+        return Tensor(out_data)
+
+    def view_as(x, other):
+        # Reshape for metrics / inference but should likely remove and handle differently
+        target_shape = other.data.shape if isinstance(other, Tensor) else np.array(other).shape
+        return Tensor(x.data.reshape(target_shape))
+
     # TODO: Add movement operators
 
     def linear(x, weights, bias):
@@ -215,6 +226,16 @@ class Tensor:
             formatted = [f"{x:.4f}" for x in self.data.flatten()]
             data_str = "[" + ", ".join(formatted) + "]"
         return f"Tensor({data_str})"
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return Tensor(self.data[idx])
+
+    def item(self):
+        """Return the scalar value"""
+        return float(self.data.item())
 
     # Weight Initialization Methods
     @staticmethod
