@@ -1,6 +1,6 @@
 [project]
 name = "pytorch-mini"
-version = "0.1.1"
+version = "0.1.2"
 description = "A minimal PyTorch-like autograd engine"
 readme = "README.md"
 requires-python = ">=3.7"
