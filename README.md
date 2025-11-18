@@ -20,7 +20,7 @@ My goal is to write most of the code without relying on external libraries and a
 ## Installation
 
 ```bash
-pip install pytorch-mini
+uv pip install pytorch-mini
 ```
 and run this [MNIST example](examples/mnist.py)
 
