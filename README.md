@@ -17,6 +17,24 @@ Minitorch             96.41         0.1319             4.42
 
 My goal is to write most of the code without relying on external libraries and abstractions. So far it's been a rewarding learning experience and I'm heading into PyTorch codebase's rabbit hole. Along the way, I've also come across several jargons that I've found helpful to understand [jargons](#jargons). It's also been very helpful to debug issues by comparing outputs to Pytorch so I've done so in the [test/](test). Oh well, I guess I'm in for a long journey :)
 
+## Installation
+
+```bash
+pip install pytorch-mini
+```
+and run this [MNIST example](examples/mnist.py)
+
+or get it from the source
+```bash
+# Clone the repository
+git clone https://github.com/krjadhav/pytorch-mini.git
+cd pytorch-mini
+pip install numpy
+
+# Install test dependencies (optional)
+pip install torch matplotlib
+```
+
 A deep learning library like PyTorch has 4 main components:
 1. Tensors
 2. Autograd
@@ -117,18 +135,6 @@ chunks of data
 
 #### epoch
 Iteration of the training loop
-
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/krjadhav/pytorch-mini.git
-cd pytorch-mini
-pip install numpy
-
-# Install test dependencies (optional)
-pip install torch matplotlib
-```
 
 ## Project Structure
 
